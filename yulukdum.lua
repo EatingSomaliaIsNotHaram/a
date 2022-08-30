@@ -7325,244 +7325,6 @@ RunService.RenderStepped:Connect(function(step)
 		else
 			NewScope.Enabled = false
 		end;
-        BodyVelocity:Destroy()
-		BodyVelocity = Instance.new("BodyVelocity")
-		BodyVelocity.MaxForce = Vector3.new(300000, 0, 300000)
-		if UserInputService:IsKeyDown("Space") and values.misc.movement["bunny hop"].Toggle then
-			local add = 0;
-			if values.misc.movement.direction.Dropdown == "directional" or values.misc.movement.direction.Dropdown == "directional 2" then
-				if UserInputService:IsKeyDown("A") then
-					add = 90
-				end;
-				if UserInputService:IsKeyDown("S") then
-					add = 180
-				end;
-				if UserInputService:IsKeyDown("D") then
-					add = 270
-				end;
-				if UserInputService:IsKeyDown("A") and UserInputService:IsKeyDown("W") then
-					add = 45
-				end;
-				if UserInputService:IsKeyDown("D") and UserInputService:IsKeyDown("W") then
-					add = 315
-				end;
-				if UserInputService:IsKeyDown("D") and UserInputService:IsKeyDown("S") then
-					add = 225
-				end;
-				if UserInputService:IsKeyDown("A") and UserInputService:IsKeyDown("S") then
-					add = 145
-				end
-			end;
-			if game.Players.LocalPlayer.Character:FindFirstChild("jumpcd") then
-				game.Players.LocalPlayer.Character.jumpcd:Destroy()
-			end;
-			local rot = YROTATION(CamCFrame) * CFrame.Angles(0, math.rad(add), 0)
-			BodyVelocity.Parent = LocalPlayer.Character.UpperTorso;
-			LocalPlayer.Character.Humanoid.Jump = true;
-			BodyVelocity.Velocity = Vector3.new(rot.LookVector.X, 0, rot.LookVector.Z) * (values.misc.movement["speed"].Slider * 2)
-			if add == 0 and values.misc.movement.direction.Dropdown == "directional" and not UserInputService:IsKeyDown("W") then
-				BodyVelocity:Destroy()
-			else
-				if values.misc.movement.type.Dropdown == "cframe" then
-					BodyVelocity:Destroy()
-					Root.CFrame = Root.CFrame + Vector3.new(rot.LookVector.X, 0, rot.LookVector.Z) * values.misc.movement["speed"].Slider / 15
-				end
-			end
-		end;
-		if values.misc.movement["edge jump"].Toggle and values.misc.movement["edge jump"].Active then
-			if LocalPlayer.Character.Humanoid:GetState() ~= Enum.HumanoidStateType.Freefall and LocalPlayer.Character.Humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
-				coroutine.wrap(function()
-					RunService.RenderStepped:Wait()
-					if LocalPlayer.Character ~= nil and LocalPlayer.Character:FindFirstChild("Humanoid") and LocalPlayer.Character.Humanoid:GetState() == Enum.HumanoidStateType.Freefall and LocalPlayer.Character.Humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
-						LocalPlayer.Character.Humanoid:ChangeState("Jumping")
-					end
-				end)()
-			end
-		end;
-		Jitter = not Jitter;
-		LocalPlayer.Character.Humanoid.AutoRotate = false;
-		if values.rage.angles.enabled.Toggle and not DisableAA then
-			local Angle = -math.atan2(CamLook.Z, CamLook.X) + math.rad(-90)
-			if values.rage.angles["yaw base"].Dropdown == "spin" then
-				Angle = Angle + math.rad(Spin)
-			end;
-			if values.rage.angles["yaw base"].Dropdown == "random" then
-				Angle = Angle + math.rad(math.random(0, 360))
-			end;
-			local Offset = math.rad(-values.rage.angles["yaw offset"].Slider - (values.rage.angles.jitter.Toggle and Jitter and values.rage.angles["jitter offset"].Slider or 0))
-			local CFramePos = CFrame.new(Root.Position) * CFrame.Angles(0, Angle + Offset, 0)
-			if values.rage.angles["yaw base"].Dropdown == "targets" then
-				local part;
-				local closest = 9999;
-				for _, plr in pairs(Players:GetPlayers()) do
-					if plr.Character and plr.Character:FindFirstChild("Humanoid") and plr.Character:FindFirstChild("Humanoid").Health > 0 and plr.Team ~= LocalPlayer.Team then
-						local pos, onScreen = Camera:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position)
-						local magnitude = (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude;
-						if closest > magnitude then
-							part = plr.Character.HumanoidRootPart;
-							closest = magnitude
-						end
-					end
-				end;
-				if part ~= nil then
-					CFramePos = CFrame.new(Root.Position, part.Position) * CFrame.Angles(0, Offset, 0)
-				end
-			end;
-			Root.CFrame = YROTATION(CFramePos)
-			if values.rage.angles["body roll"].Dropdown == "180" then
-				Root.CFrame = Root.CFrame * CFrame.Angles(values.rage.angles["body roll"].Dropdown == "180" and math.rad(180) or 0, 1, 0)
-				LocalPlayer.Character.Humanoid.HipHeight = 4
-			else
-				LocalPlayer.Character.Humanoid.HipHeight = 2
-			end;
-			local Pitch = values.rage.angles["pitch"].Dropdown == "none" and CamLook.Y or values.rage.angles["pitch"].Dropdown == "up" and 1 or values.rage.angles["pitch"].Dropdown == "down" and -1 or values.rage.angles["pitch"].Dropdown == "zero" and 0 or values.rage.angles["pitch"].Dropdown == "random" and math.random(-10, 10) / 10 or 2.5;
-			if values.rage.angles["extend pitch"].Toggle and (values.rage.angles["pitch"].Dropdown == "up" or values.rage.angles["pitch"].Dropdown == "down") then
-				Pitch = (Pitch * 2) / 1.6
-			end;
-			game.ReplicatedStorage.Events.ControlTurn:FireServer(Pitch, LocalPlayer.Character:FindFirstChild("Climbing") and true or false)
-		else
-			LocalPlayer.Character.Humanoid.HipHeight = 2;
-			Root.CFrame = CFrame.new(Root.Position) * CFrame.Angles(0, -math.atan2(CamLook.Z, CamLook.X) + math.rad(270), 0)
-			game.ReplicatedStorage.Events.ControlTurn:FireServer(CamLook.Y, LocalPlayer.Character:FindFirstChild("Climbing") and true or false)
-		end;
-		if values.rage.others["remove head"].Toggle then
-			if LocalPlayer.Character:FindFirstChild("FakeHead") then
-				LocalPlayer.Character.FakeHead:Destroy()
-			end;
-			if LocalPlayer.Character:FindFirstChild("HeadHB") then
-				LocalPlayer.Character.HeadHB:Destroy()
-			end
-		end;
-		if table.find(values.misc.client["gun modifiers"].Jumbobox, "recoil") then
-			Client.resetaccuracy()
-			Client.RecoilX = 0;
-			Client.RecoilY = 0
-		end
-	else
-		pcall(function()
-			workspace:FindFirstChild('FreezeCharacter'):Remove()
-		end)
-	end;
-	for _, Player in pairs(Players:GetPlayers()) do
-		if Player.Character and Player ~= LocalPlayer and Player.Character:FindFirstChild("HumanoidRootPart") and Player.Character.HumanoidRootPart:FindFirstChild("OldPosition") then
-			coroutine.wrap(function()
-				local Position = Player.Character.HumanoidRootPart.Position;
-				RunService.RenderStepped:Wait()
-				if Player.Character and Player ~= LocalPlayer and Player.Character:FindFirstChild("HumanoidRootPart") then
-					if Player.Character.HumanoidRootPart:FindFirstChild("OldPosition") then
-						Player.Character.HumanoidRootPart.OldPosition.Value = Position
-					else
-						local Value = Instance.new("Vector3Value")
-						Value.Name = "OldPosition"
-						Value.Value = Position;
-						Value.Parent = Player.Character.HumanoidRootPart
-					end
-				end
-			end)()
-		end
-	end;
-	for _, Player in pairs(Players:GetPlayers()) do
-		local tbl = objects[Player]
-		if tbl == nil then
-			return
-		end;
-		if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") and Player.Team ~= "TTT" and (Player.Team ~= LocalPlayer.Team or values.visuals.players.teammates.Toggle) and Player.Character:FindFirstChild("Gun") and Player.Character:FindFirstChild("Humanoid") and Player ~= LocalPlayer then
-			local HumanoidRootPart = Player.Character.HumanoidRootPart;
-			local RootPosition = HumanoidRootPart.Position;
-			local Pos, OnScreen = Camera:WorldToViewportPoint(RootPosition)
-			local Size = (Camera:WorldToViewportPoint(RootPosition - Vector3.new(0, 3, 0)).Y - Camera:WorldToViewportPoint(RootPosition + Vector3.new(0, 2.6, 0)).Y) / 2;
-			local Drawings, Text = table.find(values.visuals.players.outlines.Jumbobox, "drawings") ~= nil, table.find(values.visuals.players.outlines.Jumbobox, "text") ~= nil;
-			tbl.Box.Color = values.visuals.players.box.Color;
-			tbl.Box.Size = Vector2.new(Size * 1.1, Size * 1.9)
-			tbl.Box.Position = Vector2.new(Pos.X - Size * 1.1 / 2, (Pos.Y - Size * 1.6 / 2))
-			if values.visuals.players.box.Toggle then
-				tbl.Box.Visible = OnScreen;
-				if Drawings then
-					tbl.BoxOutline.Size = tbl.Box.Size;
-					tbl.BoxOutline.Position = tbl.Box.Position;
-					tbl.BoxOutline.Visible = OnScreen
-				else
-					tbl.BoxOutline.Visible = false
-				end
-			else
-				tbl.Box.Visible = false;
-				tbl.BoxOutline.Visible = false
-			end;
-			if values.visuals.players.health.Toggle then
-				if not values.visuals.players["health color"].Toggle then
-					tbl.Health.Color = Color3.new(0, 1, 0)
-				else
-					tbl.Health.Color = values.visuals.players["health color"].Color
-				end;
-				tbl.Health.From = Vector2.new((tbl.Box.Position.X - 5), tbl.Box.Position.Y + tbl.Box.Size.Y)
-				tbl.Health.To = Vector2.new(tbl.Health.From.X, tbl.Health.From.Y - (Player.Character.Humanoid.Health / Player.Character.Humanoid.MaxHealth) * tbl.Box.Size.Y)
-				tbl.Health.Visible = OnScreen;
-				if Drawings then
-					tbl.HealthOutline.From = Vector2.new(tbl.Health.From.X, tbl.Box.Position.Y + tbl.Box.Size.Y + 1)
-					tbl.HealthOutline.To = Vector2.new(tbl.Health.From.X, (tbl.Health.From.Y - 1 * tbl.Box.Size.Y) - 1)
-					tbl.HealthOutline.Visible = OnScreen
-				else
-					tbl.HealthOutline.Visible = false
-				end
-			else
-				tbl.Health.Visible = false;
-				tbl.HealthOutline.Visible = false
-			end;
-			if values.visuals.players.weapon.Toggle then
-				tbl.Weapon.Color = values.visuals.players.weapon.Color;
-				tbl.Weapon.Text = Player.Character.EquippedTool.Value;
-				tbl.Weapon.Position = Vector2.new(tbl.Box.Size.X / 2 + tbl.Box.Position.X, tbl.Box.Size.Y + tbl.Box.Position.Y + 1)
-				tbl.Weapon.Font = Drawing.Fonts[values.visuals.players.font.Dropdown]
-				tbl.Weapon.Outline = Text;
-				tbl.Weapon.Size = values.visuals.players.size.Slider;
-				tbl.Weapon.Visible = OnScreen
-			else
-				tbl.Weapon.Visible = false
-			end;
-			if values.visuals.players["weapon icon"].Toggle then
-				Items[Player.Name].ImageColor3 = values.visuals.players["weapon icon"].Color;
-				Items[Player.Name].Image = GetIcon.getWeaponOfKiller(Player.Character.EquippedTool.Value)
-				Items[Player.Name].Position = UDim2.new(0, tbl.Box.Size.X / 2 + tbl.Box.Position.X, 0, tbl.Box.Size.Y + tbl.Box.Position.Y + (values.visuals.players.weapon.Toggle and -10 or -22))
-				Items[Player.Name].Visible = OnScreen
-			else
-				Items[Player.Name].Visible = false
-			end;
-			if values.visuals.players.name.Toggle then
-				tbl.Name.Color = values.visuals.players.name.Color;
-				tbl.Name.Text = Player.Name;
-				tbl.Name.Position = Vector2.new(tbl.Box.Size.X / 2 + tbl.Box.Position.X, tbl.Box.Position.Y - 16)
-				tbl.Name.Font = Drawing.Fonts[values.visuals.players.font.Dropdown]
-				tbl.Name.Outline = Text;
-				tbl.Name.Size = values.visuals.players.size.Slider;
-				tbl.Name.Visible = OnScreen
-			else
-				tbl.Name.Visible = false
-			end;
-			local LastInfoPos = tbl.Box.Position.Y - 1;
-			if table.find(values.visuals.players.indicators.Jumbobox, "armor") and Player:FindFirstChild("Kevlar") then
-				if not values.visuals.players["indicator color"].Toggle then
-					tbl.Armor.Color = Color3.fromRGB(0, 150, 255)
-				else
-					tbl.Armor.Color = values.visuals.players["indicator color"].Color
-				end;
-				tbl.Armor.Text = Player:FindFirstChild("Helmet") and "HK" or "K"
-				tbl.Armor.Position = Vector2.new(tbl.Box.Size.X + tbl.Box.Position.X + 12, LastInfoPos)
-				tbl.Armor.Font = Drawing.Fonts[values.visuals.players.font.Dropdown]
-				tbl.Armor.Outline = Text;
-				tbl.Armor.Size = values.visuals.players.size.Slider;
-				tbl.Armor.Visible = OnScreen;
-				LastInfoPos = LastInfoPos + values.visuals.players.size.Slider
-			else
-				tbl.Armor.Visible = false
-			end
-		else
-			if Player.Name ~= LocalPlayer.Name then
-				Items[Player.Name].Visible = false;
-				for i, v in pairs(tbl) do
-					v.Visible = false
-				end
-			end
-		end
 		local RageGuy;
 		if workspace:FindFirstChild("Map") and Client.gun ~= "none" and Client.gun.Name ~= "C4" then
 			if values.rage.aimbot.enabled.Toggle then
@@ -8014,7 +7776,245 @@ RunService.RenderStepped:Connect(function(step)
 				end
 			end
 		end;
-    end
+		BodyVelocity:Destroy()
+		BodyVelocity = Instance.new("BodyVelocity")
+		BodyVelocity.MaxForce = Vector3.new(300000, 0, 300000)
+		if UserInputService:IsKeyDown("Space") and values.misc.movement["bunny hop"].Toggle then
+			local add = 0;
+			if values.misc.movement.direction.Dropdown == "directional" or values.misc.movement.direction.Dropdown == "directional 2" then
+				if UserInputService:IsKeyDown("A") then
+					add = 90
+				end;
+				if UserInputService:IsKeyDown("S") then
+					add = 180
+				end;
+				if UserInputService:IsKeyDown("D") then
+					add = 270
+				end;
+				if UserInputService:IsKeyDown("A") and UserInputService:IsKeyDown("W") then
+					add = 45
+				end;
+				if UserInputService:IsKeyDown("D") and UserInputService:IsKeyDown("W") then
+					add = 315
+				end;
+				if UserInputService:IsKeyDown("D") and UserInputService:IsKeyDown("S") then
+					add = 225
+				end;
+				if UserInputService:IsKeyDown("A") and UserInputService:IsKeyDown("S") then
+					add = 145
+				end
+			end;
+			if game.Players.LocalPlayer.Character:FindFirstChild("jumpcd") then
+				game.Players.LocalPlayer.Character.jumpcd:Destroy()
+			end;
+			local rot = YROTATION(CamCFrame) * CFrame.Angles(0, math.rad(add), 0)
+			BodyVelocity.Parent = LocalPlayer.Character.UpperTorso;
+			LocalPlayer.Character.Humanoid.Jump = true;
+			BodyVelocity.Velocity = Vector3.new(rot.LookVector.X, 0, rot.LookVector.Z) * (values.misc.movement["speed"].Slider * 2)
+			if add == 0 and values.misc.movement.direction.Dropdown == "directional" and not UserInputService:IsKeyDown("W") then
+				BodyVelocity:Destroy()
+			else
+				if values.misc.movement.type.Dropdown == "cframe" then
+					BodyVelocity:Destroy()
+					Root.CFrame = Root.CFrame + Vector3.new(rot.LookVector.X, 0, rot.LookVector.Z) * values.misc.movement["speed"].Slider / 15
+				end
+			end
+		end;
+		if values.misc.movement["edge jump"].Toggle and values.misc.movement["edge jump"].Active then
+			if LocalPlayer.Character.Humanoid:GetState() ~= Enum.HumanoidStateType.Freefall and LocalPlayer.Character.Humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
+				coroutine.wrap(function()
+					RunService.RenderStepped:Wait()
+					if LocalPlayer.Character ~= nil and LocalPlayer.Character:FindFirstChild("Humanoid") and LocalPlayer.Character.Humanoid:GetState() == Enum.HumanoidStateType.Freefall and LocalPlayer.Character.Humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
+						LocalPlayer.Character.Humanoid:ChangeState("Jumping")
+					end
+				end)()
+			end
+		end;
+		Jitter = not Jitter;
+		LocalPlayer.Character.Humanoid.AutoRotate = false;
+		if values.rage.angles.enabled.Toggle and not DisableAA then
+			local Angle = -math.atan2(CamLook.Z, CamLook.X) + math.rad(-90)
+			if values.rage.angles["yaw base"].Dropdown == "spin" then
+				Angle = Angle + math.rad(Spin)
+			end;
+			if values.rage.angles["yaw base"].Dropdown == "random" then
+				Angle = Angle + math.rad(math.random(0, 360))
+			end;
+			local Offset = math.rad(-values.rage.angles["yaw offset"].Slider - (values.rage.angles.jitter.Toggle and Jitter and values.rage.angles["jitter offset"].Slider or 0))
+			local CFramePos = CFrame.new(Root.Position) * CFrame.Angles(0, Angle + Offset, 0)
+			if values.rage.angles["yaw base"].Dropdown == "targets" then
+				local part;
+				local closest = 9999;
+				for _, plr in pairs(Players:GetPlayers()) do
+					if plr.Character and plr.Character:FindFirstChild("Humanoid") and plr.Character:FindFirstChild("Humanoid").Health > 0 and plr.Team ~= LocalPlayer.Team then
+						local pos, onScreen = Camera:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position)
+						local magnitude = (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude;
+						if closest > magnitude then
+							part = plr.Character.HumanoidRootPart;
+							closest = magnitude
+						end
+					end
+				end;
+				if part ~= nil then
+					CFramePos = CFrame.new(Root.Position, part.Position) * CFrame.Angles(0, Offset, 0)
+				end
+			end;
+			Root.CFrame = YROTATION(CFramePos)
+			if values.rage.angles["body roll"].Dropdown == "180" then
+				Root.CFrame = Root.CFrame * CFrame.Angles(values.rage.angles["body roll"].Dropdown == "180" and math.rad(180) or 0, 1, 0)
+				LocalPlayer.Character.Humanoid.HipHeight = 4
+			else
+				LocalPlayer.Character.Humanoid.HipHeight = 2
+			end;
+			local Pitch = values.rage.angles["pitch"].Dropdown == "none" and CamLook.Y or values.rage.angles["pitch"].Dropdown == "up" and 1 or values.rage.angles["pitch"].Dropdown == "down" and -1 or values.rage.angles["pitch"].Dropdown == "zero" and 0 or values.rage.angles["pitch"].Dropdown == "random" and math.random(-10, 10) / 10 or 2.5;
+			if values.rage.angles["extend pitch"].Toggle and (values.rage.angles["pitch"].Dropdown == "up" or values.rage.angles["pitch"].Dropdown == "down") then
+				Pitch = (Pitch * 2) / 1.6
+			end;
+			game.ReplicatedStorage.Events.ControlTurn:FireServer(Pitch, LocalPlayer.Character:FindFirstChild("Climbing") and true or false)
+		else
+			LocalPlayer.Character.Humanoid.HipHeight = 2;
+			Root.CFrame = CFrame.new(Root.Position) * CFrame.Angles(0, -math.atan2(CamLook.Z, CamLook.X) + math.rad(270), 0)
+			game.ReplicatedStorage.Events.ControlTurn:FireServer(CamLook.Y, LocalPlayer.Character:FindFirstChild("Climbing") and true or false)
+		end;
+		if values.rage.others["remove head"].Toggle then
+			if LocalPlayer.Character:FindFirstChild("FakeHead") then
+				LocalPlayer.Character.FakeHead:Destroy()
+			end;
+			if LocalPlayer.Character:FindFirstChild("HeadHB") then
+				LocalPlayer.Character.HeadHB:Destroy()
+			end
+		end;
+		if table.find(values.misc.client["gun modifiers"].Jumbobox, "recoil") then
+			Client.resetaccuracy()
+			Client.RecoilX = 0;
+			Client.RecoilY = 0
+		end
+	else
+		pcall(function()
+			workspace:FindFirstChild('FreezeCharacter'):Remove()
+		end)
+	end;
+	for _, Player in pairs(Players:GetPlayers()) do
+		if Player.Character and Player ~= LocalPlayer and Player.Character:FindFirstChild("HumanoidRootPart") and Player.Character.HumanoidRootPart:FindFirstChild("OldPosition") then
+			coroutine.wrap(function()
+				local Position = Player.Character.HumanoidRootPart.Position;
+				RunService.RenderStepped:Wait()
+				if Player.Character and Player ~= LocalPlayer and Player.Character:FindFirstChild("HumanoidRootPart") then
+					if Player.Character.HumanoidRootPart:FindFirstChild("OldPosition") then
+						Player.Character.HumanoidRootPart.OldPosition.Value = Position
+					else
+						local Value = Instance.new("Vector3Value")
+						Value.Name = "OldPosition"
+						Value.Value = Position;
+						Value.Parent = Player.Character.HumanoidRootPart
+					end
+				end
+			end)()
+		end
+	end;
+	for _, Player in pairs(Players:GetPlayers()) do
+		local tbl = objects[Player]
+		if tbl == nil then
+			return
+		end;
+		if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") and Player.Team ~= "TTT" and (Player.Team ~= LocalPlayer.Team or values.visuals.players.teammates.Toggle) and Player.Character:FindFirstChild("Gun") and Player.Character:FindFirstChild("Humanoid") and Player ~= LocalPlayer then
+			local HumanoidRootPart = Player.Character.HumanoidRootPart;
+			local RootPosition = HumanoidRootPart.Position;
+			local Pos, OnScreen = Camera:WorldToViewportPoint(RootPosition)
+			local Size = (Camera:WorldToViewportPoint(RootPosition - Vector3.new(0, 3, 0)).Y - Camera:WorldToViewportPoint(RootPosition + Vector3.new(0, 2.6, 0)).Y) / 2;
+			local Drawings, Text = table.find(values.visuals.players.outlines.Jumbobox, "drawings") ~= nil, table.find(values.visuals.players.outlines.Jumbobox, "text") ~= nil;
+			tbl.Box.Color = values.visuals.players.box.Color;
+			tbl.Box.Size = Vector2.new(Size * 1.1, Size * 1.9)
+			tbl.Box.Position = Vector2.new(Pos.X - Size * 1.1 / 2, (Pos.Y - Size * 1.6 / 2))
+			if values.visuals.players.box.Toggle then
+				tbl.Box.Visible = OnScreen;
+				if Drawings then
+					tbl.BoxOutline.Size = tbl.Box.Size;
+					tbl.BoxOutline.Position = tbl.Box.Position;
+					tbl.BoxOutline.Visible = OnScreen
+				else
+					tbl.BoxOutline.Visible = false
+				end
+			else
+				tbl.Box.Visible = false;
+				tbl.BoxOutline.Visible = false
+			end;
+			if values.visuals.players.health.Toggle then
+				if not values.visuals.players["health color"].Toggle then
+					tbl.Health.Color = Color3.new(0, 1, 0)
+				else
+					tbl.Health.Color = values.visuals.players["health color"].Color
+				end;
+				tbl.Health.From = Vector2.new((tbl.Box.Position.X - 5), tbl.Box.Position.Y + tbl.Box.Size.Y)
+				tbl.Health.To = Vector2.new(tbl.Health.From.X, tbl.Health.From.Y - (Player.Character.Humanoid.Health / Player.Character.Humanoid.MaxHealth) * tbl.Box.Size.Y)
+				tbl.Health.Visible = OnScreen;
+				if Drawings then
+					tbl.HealthOutline.From = Vector2.new(tbl.Health.From.X, tbl.Box.Position.Y + tbl.Box.Size.Y + 1)
+					tbl.HealthOutline.To = Vector2.new(tbl.Health.From.X, (tbl.Health.From.Y - 1 * tbl.Box.Size.Y) - 1)
+					tbl.HealthOutline.Visible = OnScreen
+				else
+					tbl.HealthOutline.Visible = false
+				end
+			else
+				tbl.Health.Visible = false;
+				tbl.HealthOutline.Visible = false
+			end;
+			if values.visuals.players.weapon.Toggle then
+				tbl.Weapon.Color = values.visuals.players.weapon.Color;
+				tbl.Weapon.Text = Player.Character.EquippedTool.Value;
+				tbl.Weapon.Position = Vector2.new(tbl.Box.Size.X / 2 + tbl.Box.Position.X, tbl.Box.Size.Y + tbl.Box.Position.Y + 1)
+				tbl.Weapon.Font = Drawing.Fonts[values.visuals.players.font.Dropdown]
+				tbl.Weapon.Outline = Text;
+				tbl.Weapon.Size = values.visuals.players.size.Slider;
+				tbl.Weapon.Visible = OnScreen
+			else
+				tbl.Weapon.Visible = false
+			end;
+			if values.visuals.players["weapon icon"].Toggle then
+				Items[Player.Name].ImageColor3 = values.visuals.players["weapon icon"].Color;
+				Items[Player.Name].Image = GetIcon.getWeaponOfKiller(Player.Character.EquippedTool.Value)
+				Items[Player.Name].Position = UDim2.new(0, tbl.Box.Size.X / 2 + tbl.Box.Position.X, 0, tbl.Box.Size.Y + tbl.Box.Position.Y + (values.visuals.players.weapon.Toggle and -10 or -22))
+				Items[Player.Name].Visible = OnScreen
+			else
+				Items[Player.Name].Visible = false
+			end;
+			if values.visuals.players.name.Toggle then
+				tbl.Name.Color = values.visuals.players.name.Color;
+				tbl.Name.Text = Player.Name;
+				tbl.Name.Position = Vector2.new(tbl.Box.Size.X / 2 + tbl.Box.Position.X, tbl.Box.Position.Y - 16)
+				tbl.Name.Font = Drawing.Fonts[values.visuals.players.font.Dropdown]
+				tbl.Name.Outline = Text;
+				tbl.Name.Size = values.visuals.players.size.Slider;
+				tbl.Name.Visible = OnScreen
+			else
+				tbl.Name.Visible = false
+			end;
+			local LastInfoPos = tbl.Box.Position.Y - 1;
+			if table.find(values.visuals.players.indicators.Jumbobox, "armor") and Player:FindFirstChild("Kevlar") then
+				if not values.visuals.players["indicator color"].Toggle then
+					tbl.Armor.Color = Color3.fromRGB(0, 150, 255)
+				else
+					tbl.Armor.Color = values.visuals.players["indicator color"].Color
+				end;
+				tbl.Armor.Text = Player:FindFirstChild("Helmet") and "HK" or "K"
+				tbl.Armor.Position = Vector2.new(tbl.Box.Size.X + tbl.Box.Position.X + 12, LastInfoPos)
+				tbl.Armor.Font = Drawing.Fonts[values.visuals.players.font.Dropdown]
+				tbl.Armor.Outline = Text;
+				tbl.Armor.Size = values.visuals.players.size.Slider;
+				tbl.Armor.Visible = OnScreen;
+				LastInfoPos = LastInfoPos + values.visuals.players.size.Slider
+			else
+				tbl.Armor.Visible = false
+			end
+		else
+			if Player.Name ~= LocalPlayer.Name then
+				Items[Player.Name].Visible = false;
+				for i, v in pairs(tbl) do
+					v.Visible = false
+				end
+			end
+		end
+	end
 end)
 local L_172_ = nil;
 local L_173_ = values.visuals.self["silent angle speed"].Slider / 10;
