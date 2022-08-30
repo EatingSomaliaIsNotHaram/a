@@ -7480,7 +7480,8 @@ RunService.RenderStepped:Connect(function(step)
 														Damage = (Damage / 100) * Client.gun.ArmorPenetration.Value
 													end
 												end;
-												if not values.rage.aimbot["old ray method"].Toggle then
+                                                Damage = Damage * (Client.gun.RangeModifier.Value / 100 ^ ((Origin - EndHit.Position).Magnitude / 500)) / 100;
+                                                if not values.rage.aimbot["old ray method"].Toggle then
 													Damage = Damage * (Client.gun.RangeModifier.Value / 100 ^ ((Origin - EndHit.Position).Magnitude / 500)) / 100;
 												else
 													Damage = (Damage / 100) * Client.gun.ArmorPenetration.Value
@@ -7633,11 +7634,6 @@ RunService.RenderStepped:Connect(function(step)
 													Damage = (Damage / 100) * Client.gun.ArmorPenetration.Value
 												end
 											end;
-											if not values.rage.aimbot["old ray method"].Toggle then
-												Damage = Damage * (Client.gun.RangeModifier.Value / 100 ^ ((Origin - EndHit.Position).Magnitude / 500)) / 100;
-											else
-												Damage = (Damage / 100) * Client.gun.ArmorPenetration.Value
-											end
 											if Damage >= Stats["minimum damage"].Slider then
 												RageGuy = Hit;
 												RageTarget = Hit;
