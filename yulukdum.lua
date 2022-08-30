@@ -4725,7 +4725,7 @@ for _, lua in pairs(listfiles("aristoislua")) do
 	table.insert(allluas, luaname)
 end;
 RunService.RenderStepped:Wait()
-local gui = library:New("Voidclient Public")
+local gui = library:New("VcPrivate")
 local legit = gui:Tab("legit")
 local rage = gui:Tab("rage")
 local visuals = gui:Tab("visuals")
@@ -7634,6 +7634,12 @@ RunService.RenderStepped:Connect(function(step)
 													Damage = (Damage / 100) * Client.gun.ArmorPenetration.Value
 												end
 											end;
+                                            Damage = Damage * (Client.gun.RangeModifier.Value / 100 ^ ((Origin - EndHit.Position).Magnitude / 500)) / 100;
+                                            if not values.rage.aimbot["old ray method"].Toggle then
+                                                Damage = Damage * (Client.gun.RangeModifier.Value / 100 ^ ((Origin - EndHit.Position).Magnitude / 500)) / 100;
+                                            else
+                                                Damage = (Damage / 100) * Client.gun.ArmorPenetration.Value
+                                            end
 											if Damage >= Stats["minimum damage"].Slider then
 												RageGuy = Hit;
 												RageTarget = Hit;
